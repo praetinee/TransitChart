@@ -867,7 +867,7 @@
         async function exportSummaryImage() {
             const btn = document.getElementById('btnExportImage');
             const originalBtnHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> กำลังสร้างรูปภาพ...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> กำลังสร้างรูปภาพความละเอียดสูง...';
             btn.disabled = true;
 
             try {
@@ -884,7 +884,7 @@
                 function getPlanetTexts(chartKey, houseId) {
                     const planets = charts[chartKey][houseId];
                     if (!planets || planets.length === 0) {
-                        return '<span style="color:#64748b; font-size:11px; font-style:italic;">- ไม่มีดาวสถิต -</span>';
+                        return '<span style="color:#64748b; font-size:12px; font-style:italic;">- ไม่มีดาวสถิต -</span>';
                     }
                     return planets.map(pCode => {
                         const pl = planetsData.find(p => p.code === pCode);
@@ -893,9 +893,9 @@
                             ? currentDict[houseId][pCode] 
                             : '[ยังไม่มีคำแปล]';
                         return `
-                            <div style="margin-bottom:6px; padding:6px 8px; background:rgba(15,23,42,0.6); border-radius:6px; border:1px solid rgba(99,102,241,0.25);">
-                                <div style="font-weight:600; color:#c084fc; font-size:12px; margin-bottom:2px;">★ ${pName}</div>
-                                <div style="color:#e2e8f0; font-size:11px; line-height:1.5;">${meaning}</div>
+                            <div style="margin-bottom:8px; padding:8px 10px; background:rgba(15,23,42,0.75); border-radius:8px; border:1px solid rgba(99,102,241,0.35);">
+                                <div style="font-weight:600; color:#c084fc; font-size:13px; margin-bottom:3px; font-family:'Chakra Petch', sans-serif;">★ ${pName}</div>
+                                <div style="color:#f1f5f9; font-size:12px; line-height:1.6; font-family:'Chakra Petch', sans-serif;">${meaning}</div>
                             </div>
                         `;
                     }).join('');
@@ -908,22 +908,22 @@
                     const treyangContent = getPlanetTexts('treyang', h.id);
 
                     const hasPlanet = (charts.rasri[h.id].length > 0 || charts.navang[h.id].length > 0 || charts.treyang[h.id].length > 0);
-                    const rowBg = hasPlanet ? 'rgba(30, 27, 75, 0.45)' : 'rgba(15, 23, 42, 0.3)';
+                    const rowBg = hasPlanet ? 'rgba(30, 27, 75, 0.5)' : 'rgba(15, 23, 42, 0.35)';
 
                     rowsHtml += `
-                        <tr style="background:${rowBg}; border-bottom:1px solid rgba(79, 70, 229, 0.2);">
-                            <td style="padding:10px 12px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:130px;">
-                                <div style="font-weight:700; color:#fbbf24; font-size:13px;">${h.name}</div>
-                                <div style="font-size:10px; color:#94a3b8; margin-top:2px;">ภพที่ ${h.id}</div>
-                                <div style="font-size:10px; color:#cbd5e1; margin-top:4px; opacity:0.8;">${h.desc}</div>
+                        <tr style="background:${rowBg}; border-bottom:1px solid rgba(79, 70, 229, 0.25);">
+                            <td style="padding:14px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.3); width:140px;">
+                                <div style="font-weight:700; color:#fbbf24; font-size:14px; font-family:'Chakra Petch', sans-serif;">${h.name}</div>
+                                <div style="font-size:11px; color:#94a3b8; margin-top:2px; font-family:'Chakra Petch', sans-serif;">ภพที่ ${h.id}</div>
+                                <div style="font-size:11px; color:#cbd5e1; margin-top:4px; opacity:0.9; font-family:'Chakra Petch', sans-serif;">${h.desc}</div>
                             </td>
-                            <td style="padding:10px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:29%;">
+                            <td style="padding:12px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.3); width:29%;">
                                 ${rasriContent}
                             </td>
-                            <td style="padding:10px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:29%;">
+                            <td style="padding:12px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.3); width:29%;">
                                 ${navangContent}
                             </td>
-                            <td style="padding:10px; vertical-align:top; width:29%;">
+                            <td style="padding:12px; vertical-align:top; width:29%;">
                                 ${treyangContent}
                             </td>
                         </tr>
@@ -934,36 +934,36 @@
                 exportContainer.style.position = 'fixed';
                 exportContainer.style.left = '-9999px';
                 exportContainer.style.top = '0';
-                exportContainer.style.width = '1450px';
-                exportContainer.style.padding = '28px';
+                exportContainer.style.width = '1600px';
+                exportContainer.style.padding = '35px';
                 exportContainer.style.background = 'linear-gradient(135deg, #030712 0%, #0f172a 40%, #1e1b4b 100%)';
                 exportContainer.style.color = '#f8fafc';
                 exportContainer.style.fontFamily = "'Chakra Petch', sans-serif";
 
                 exportContainer.innerHTML = `
-                    <div style="border:1px solid rgba(129, 140, 248, 0.3); border-radius:18px; padding:20px; background:rgba(15,23,42,0.85); box-shadow:0 20px 40px rgba(0,0,0,0.6);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid rgba(129, 140, 248, 0.4); padding-bottom:14px; margin-bottom:16px;">
+                    <div style="border:1px solid rgba(129, 140, 248, 0.4); border-radius:20px; padding:24px; background:rgba(15,23,42,0.9); box-shadow:0 25px 50px rgba(0,0,0,0.7);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid rgba(129, 140, 248, 0.5); padding-bottom:16px; margin-bottom:20px;">
                             <div>
-                                <h1 style="font-size:22px; font-weight:700; color:#fde68a; margin:0 0 4px 0;">
+                                <h1 style="font-size:24px; font-weight:700; color:#fde68a; margin:0 0 6px 0; font-family:'Chakra Petch', sans-serif;">
                                     ตารางสรุปคำพยากรณ์ดวงชะตา 3 จักร (เปรียบเทียบ 12 ภพ)
                                 </h1>
-                                <p style="font-size:12px; color:#cbd5e1; margin:0;">
+                                <p style="font-size:13px; color:#cbd5e1; margin:0; font-family:'Chakra Petch', sans-serif;">
                                     บุคคล: <span style="color:#f59e0b; font-weight:700;">${profileName}</span> | โหราศาสตร์ไทย 3 จักรในแถวเดียวกัน
                                 </p>
                             </div>
                             <div style="text-align:right;">
-                                <div style="font-size:11px; color:#a5b4fc;">ราศีจักร • นวางค์จักร • ตรียางค์</div>
-                                <div style="font-size:10px; color:#94a3b8; margin-top:2px;">ส่งออกเมื่อ: ${new Date().toLocaleDateString('th-TH')}</div>
+                                <div style="font-size:12px; color:#a5b4fc; font-family:'Chakra Petch', sans-serif;">ราศีจักร • นวางค์จักร • ตรียางค์</div>
+                                <div style="font-size:11px; color:#94a3b8; margin-top:3px; font-family:'Chakra Petch', sans-serif;">ส่งออกเมื่อ: ${new Date().toLocaleDateString('th-TH')}</div>
                             </div>
                         </div>
 
                         <table style="width:100%; border-collapse:collapse; text-align:left;">
                             <thead>
-                                <tr style="background:rgba(30, 27, 75, 0.85); border-bottom:2px solid rgba(129, 140, 248, 0.5);">
-                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#fbbf24; border-right:1px solid rgba(79, 70, 229, 0.3);">เรือนชะตา (ภพ)</th>
-                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#fde68a; border-right:1px solid rgba(79, 70, 229, 0.3);"><i class="fa-solid fa-circle-nodes"></i> 1. ราศีจักร</th>
-                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#e9d5ff; border-right:1px solid rgba(79, 70, 229, 0.3);"><i class="fa-solid fa-network-wired"></i> 2. นวางค์จักร</th>
-                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#99f6e4;"><i class="fa-solid fa-diagram-project"></i> 3. ตรียางค์จักร</th>
+                                <tr style="background:rgba(30, 27, 75, 0.9); border-bottom:2px solid rgba(129, 140, 248, 0.6);">
+                                    <th style="padding:12px; font-size:14px; font-weight:700; color:#fbbf24; border-right:1px solid rgba(79, 70, 229, 0.4); font-family:'Chakra Petch', sans-serif;">เรือนชะตา (ภพ)</th>
+                                    <th style="padding:12px; font-size:14px; font-weight:700; color:#fde68a; border-right:1px solid rgba(79, 70, 229, 0.4); font-family:'Chakra Petch', sans-serif;">1. ราศีจักร</th>
+                                    <th style="padding:12px; font-size:14px; font-weight:700; color:#e9d5ff; border-right:1px solid rgba(79, 70, 229, 0.4); font-family:'Chakra Petch', sans-serif;">2. นวางค์จักร</th>
+                                    <th style="padding:12px; font-size:14px; font-weight:700; color:#99f6e4; font-family:'Chakra Petch', sans-serif;">3. ตรียางค์จักร</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -975,8 +975,9 @@
 
                 document.body.appendChild(exportContainer);
 
+                // ปรับเพิ่ม scale เป็น 3 (ความละเอียดสูงขึ้นเพื่อสู้ระบบบีบอัดรูปของ Line)
                 const canvas = await html2canvas(exportContainer, {
-                    scale: 2,
+                    scale: 3,
                     useCORS: true,
                     backgroundColor: '#030712'
                 });
