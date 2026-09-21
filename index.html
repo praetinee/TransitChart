@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ตัวช่วยจับภาพหน้าจอเป็นรูปภาพ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
            font-family: 'Chakra Petch', sans-serif;
@@ -50,6 +52,9 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
+                <button onclick="exportSummaryImage()" id="btnExportImage" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white transition flex items-center shadow-md shadow-purple-900/30">
+                    <i class="fa-solid fa-camera mr-1.5"></i> เซฟรูปสรุป 3 จักร (แนวนอน)
+                </button>
                 <button onclick="resetAllCharts()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700 flex items-center shadow-sm">
                     <i class="fa-solid fa-rotate-right mr-1.5"></i> ล้างค่าทั้งหมดของบุคคลนี้
                 </button>
@@ -982,6 +987,137 @@
         window.onload = function() {
             renderAllCharts();
         };
+        // ฟังก์ชันดึงข้อมูล 3 จักรมาจัดเป็นตารางแนวนอนแล้วบันทึกเป็นรูปภาพ
+        async function exportSummaryImage() {
+            const btn = document.getElementById('btnExportImage');
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> กำลังสร้างรูปภาพ...';
+            btn.disabled = true;
+
+            try {
+                const profileName = appData[currentProfile].name;
+                const charts = appData[currentProfile].charts;
+
+                const profileInterps = {
+                    'Jan': janInterpretations,
+                    'Anda': andaInterpretations,
+                    'YayNoi': yayNoiInterpretations
+                };
+                const currentDict = profileInterps[currentProfile] || {};
+
+                function getPlanetTexts(chartKey, houseId) {
+                    const planets = charts[chartKey][houseId];
+                    if (!planets || planets.length === 0) {
+                        return '<span style="color:#64748b; font-size:11px; font-style:italic;">- ไม่มีดาวสถิต -</span>';
+                    }
+                    return planets.map(pCode => {
+                        const pl = planetsData.find(p => p.code === pCode);
+                        const pName = pl ? pl.name : pCode;
+                        const meaning = (currentDict[houseId] && currentDict[houseId][pCode]) 
+                            ? currentDict[houseId][pCode] 
+                            : '[ยังไม่มีคำแปล]';
+                        return `
+                            <div style="margin-bottom:6px; padding:6px 8px; background:rgba(15,23,42,0.6); border-radius:6px; border:1px solid rgba(99,102,241,0.25);">
+                                <div style="font-weight:600; color:#c084fc; font-size:12px; margin-bottom:2px;">★ ${pName}</div>
+                                <div style="color:#e2e8f0; font-size:11px; line-height:1.5;">${meaning}</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                let rowsHtml = '';
+                housesData.forEach(h => {
+                    const rasriContent = getPlanetTexts('rasri', h.id);
+                    const navangContent = getPlanetTexts('navang', h.id);
+                    const treyangContent = getPlanetTexts('treyang', h.id);
+
+                    const hasPlanet = (charts.rasri[h.id].length > 0 || charts.navang[h.id].length > 0 || charts.treyang[h.id].length > 0);
+                    const rowBg = hasPlanet ? 'rgba(30, 27, 75, 0.45)' : 'rgba(15, 23, 42, 0.3)';
+
+                    rowsHtml += `
+                        <tr style="background:${rowBg}; border-bottom:1px solid rgba(79, 70, 229, 0.2);">
+                            <td style="padding:10px 12px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:130px;">
+                                <div style="font-weight:700; color:#fbbf24; font-size:13px;">${h.name}</div>
+                                <div style="font-size:10px; color:#94a3b8; margin-top:2px;">ภพที่ ${h.id}</div>
+                                <div style="font-size:10px; color:#cbd5e1; margin-top:4px; opacity:0.8;">${h.desc}</div>
+                            </td>
+                            <td style="padding:10px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:29%;">
+                                ${rasriContent}
+                            </td>
+                            <td style="padding:10px; vertical-align:top; border-right:1px solid rgba(79, 70, 229, 0.25); width:29%;">
+                                ${navangContent}
+                            </td>
+                            <td style="padding:10px; vertical-align:top; width:29%;">
+                                ${treyangContent}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                const exportContainer = document.createElement('div');
+                exportContainer.style.position = 'fixed';
+                exportContainer.style.left = '-9999px';
+                exportContainer.style.top = '0';
+                exportContainer.style.width = '1450px';
+                exportContainer.style.padding = '28px';
+                exportContainer.style.background = 'linear-gradient(135deg, #030712 0%, #0f172a 40%, #1e1b4b 100%)';
+                exportContainer.style.color = '#f8fafc';
+                exportContainer.style.fontFamily = "'Prompt', 'Google Sans', sans-serif";
+
+                exportContainer.innerHTML = `
+                    <div style="border:1px solid rgba(129, 140, 248, 0.3); border-radius:18px; padding:20px; background:rgba(15,23,42,0.85); box-shadow:0 20px 40px rgba(0,0,0,0.6);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid rgba(129, 140, 248, 0.4); padding-bottom:14px; margin-bottom:16px;">
+                            <div>
+                                <h1 style="font-size:22px; font-weight:700; color:#fde68a; margin:0 0 4px 0;">
+                                    ตารางสรุปคำพยากรณ์ดวงชะตา 3 จักร (เปรียบเทียบ 12 ภพ)
+                                </h1>
+                                <p style="font-size:12px; color:#cbd5e1; margin:0;">
+                                    บุคคล: <span style="color:#f59e0b; font-weight:700;">${profileName}</span> | โหราศาสตร์ไทย 3 จักรในแถวเดียวกัน
+                                </p>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; color:#a5b4fc;">ราศีจักร • นวางค์จักร • ตรียางค์</div>
+                                <div style="font-size:10px; color:#94a3b8; margin-top:2px;">ส่งออกเมื่อ: ${new Date().toLocaleDateString('th-TH')}</div>
+                            </div>
+                        </div>
+
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="background:rgba(30, 27, 75, 0.85); border-bottom:2px solid rgba(129, 140, 248, 0.5);">
+                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#fbbf24; border-right:1px solid rgba(79, 70, 229, 0.3);">เรือนชะตา (ภพ)</th>
+                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#fde68a; border-right:1px solid rgba(79, 70, 229, 0.3);"><i class="fa-solid fa-circle-nodes"></i> 1. ราศีจักร</th>
+                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#e9d5ff; border-right:1px solid rgba(79, 70, 229, 0.3);"><i class="fa-solid fa-network-wired"></i> 2. นวางค์จักร</th>
+                                    <th style="padding:10px; font-size:13px; font-weight:700; color:#99f6e4;"><i class="fa-solid fa-diagram-project"></i> 3. ตรียางค์จักร</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                document.body.appendChild(exportContainer);
+
+                const canvas = await html2canvas(exportContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#030712'
+                });
+
+                document.body.removeChild(exportContainer);
+
+                const link = document.createElement('a');
+                link.download = `ดวงชะตา3จักร_${profileName}_แนวนอน.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error("Export Error:", err);
+            } finally {
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
