@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบพยากรณ์ความหมายดาวจร 12 ภพ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+        .planet-badge {
+            transition: all 0.2s ease;
+        }
+        .planet-badge:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-slate-100 min-h-screen">
+
+    <header class="border-b border-indigo-900/50 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <i class="fa-solid fa-moon text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-amber-200 to-purple-300 bg-clip-text text-transparent">โหราศาสตร์ไทย 12 ภพ</h1>
+                    <p class="text-xs text-slate-400">ระบบจำลองการสถิตของดาวจร (แยกตามบุคคล)</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="resetCurrentTab()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> ล้างค่าของแท็บนี้
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Tab Navigation Bar -->
+        <div class="flex space-x-2 border-b border-indigo-900/60 pb-4 mb-6">
+            <button onclick="switchTab('Jan')" id="tabBtn-Jan" class="tab-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 bg-purple-600 text-white shadow-lg shadow-purple-600/30">
+                <i class="fa-solid fa-user-sparkles"></i>
+                <span>ดวงชะตาของ Jan</span>
+            </button>
+            <button onclick="switchTab('Anda')" id="tabBtn-Anda" class="tab-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 bg-slate-800 text-slate-300 hover:bg-slate-700">
+                <i class="fa-solid fa-user-star"></i>
+                <span>ดวงชะตาของ Anda</span>
+            </button>
+            <button onclick="switchTab('YayNoi')" id="tabBtn-YayNoi" class="tab-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 bg-slate-800 text-slate-300 hover:bg-slate-700">
+                <i class="fa-solid fa-user-crown"></i>
+                <span>ดวงชะตาของ ยายน้อย</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Planet Selector & 12 Houses -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Planet Toolbox -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-indigo-900/50 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-sm font-semibold text-amber-300 uppercase tracking-wider mb-3 flex items-center">
+                        <i class="fa-solid fa-star mr-2"></i> เลือกดาวจร (<span id="currentProfileName" class="text-purple-300 mx-1 font-bold">Jan</span>) - ลากหรือคลิกเพื่อกำหนดภพ
+                    </h2>
+                    <div id="planetList" class="flex flex-wrap gap-2">
+                        <!-- Planets injected via JS -->
+                    </div>
+                </div>
+
+                <!-- 12 Houses Container -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-indigo-900/50 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold text-purple-300 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-house-chimney mr-2"></i> ภพทั้ง 12 (เรือนชะตา)
+                        </h2>
+                        <span class="text-xs text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">คลิกที่ภพเพื่อเพิ่มดาว หรือเลือกดาวแล้วคลิกภพ</span>
+                    </div>
+                    
+                    <div id="housesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- 12 Houses injected via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Analysis / Interpretation Output -->
+            <div class="lg:col-span-5">
+                <div class="sticky top-24 bg-slate-900/80 backdrop-blur-md border border-purple-900/50 rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center justify-between pb-4 border-b border-indigo-900/40 mb-4">
+                        <h2 class="text-base font-bold text-amber-200 flex items-center">
+                            <i class="fa-solid fa-scroll mr-2 text-amber-400"></i> คำพยากรณ์และความหมาย
+                        </h2>
+                        <span id="selectedHouseIndicator" class="text-xs font-medium bg-purple-900/60 text-purple-200 px-3 py-1 rounded-full border border-purple-700/50">
+                            ภาพรวมทั้ง 12 ภพ
+                        </span>
+                    </div>
+
+                    <div id="interpretationContent" class="space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="text-center py-12 text-slate-400">
+                            <i class="fa-solid fa-wand-magic-sparkles text-4xl mb-3 text-purple-400/50"></i>
+                            <p class="text-sm">ยังไม่ได้เลือกดาวสถิตในภพ</p>
+                            <p class="text-xs text-slate-500 mt-1">กรุณากำหนดดาวจรในแต่ละภพทางด้านซ้ายเพื่อดูคำทำนาย</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // รายชื่อภพทั้ง 12 ภพมาตรฐานโหราศาสตร์ไทย
+        const housesData = [
+            { id: 1, name: "ภพตนุ", desc: "ตัวตน, ร่างกาย, นิสัย, วาสนา, ชีวิตส่วนตัว" },
+            { id: 2, name: "ภพกดุมภะ", desc: "การเงิน, ทรัพย์สิน, รายได้, ความมั่งคั่ง" },
+            { id: 3, name: "ภพสหัชชะ", desc: "การติดต่อ, สังคม, เพื่อนบ้าน, การเดินทางระยะสั้น" },
+            { id: 4, name: "ภพพันธุ", desc: "ครอบครัว, บ้าน, ที่อยู่อาศัย, รถยนต์, มรดกวงศ์ตระกูล" },
+            { id: 5, name: "ภพปุตตะ", desc: "บุตร, บริวาร, ความรัก, การเสี่ยงโชค, ความคิดสร้างสรรค์" },
+            { id: 6, name: "ภพอริ", desc: "อุปสรรค, ศัตรู, หนี้สิน, โรคภัยไข้เจ็บ, การแข่งขัน" },
+            { id: 7, name: "ภพปัตตานี", desc: "คู่ครอง, หุ้นส่วน, สัญญา, คดีความ, เพศตรงข้าม" },
+            { id: 8, name: "ภพมรณะ", desc: "ความตาย, ความสูญเสีย, โรคเรื้อรัง, แดนไกล, ความลับ" },
+            { id: 9, name: "ภพศุภะ", desc: "ความสำเร็จ, ผู้ใหญ่, การศึกษาต่อ, ศาสนา, ต่างประเทศ" },
+            { id: 10, name: "ภพกัมมะ", desc: "การงาน, อาชีพ, ชื่อเสียง, ผลงาน, หน้าที่รับผิดชอบ" },
+            { id: 11, name: "ภพลาภะ", desc: "โชคลาภ, ผลกำไร, ความสำเร็จสมหวัง, มิตรสหายช่วยเหลือ" },
+            { id: 12, name: "ภพวินาสน์", desc: "ความลับ, ศัตรูเร้นลับ, ความเสียหาย, การสูญเสียโดยไม่คาดคิด" }
+        ];
+
+        // รายชื่อดาวจร (มาตรฐาน 10 ดาวหลักในโหราศาสตร์ไทย)
+        const planetsData = [
+            { code: '1', name: 'ดาวอาทิตย์ (๑)', color: 'bg-red-500/20 border-red-500/50 text-red-200' },
+            { code: '2', name: 'ดาวจันทร์ (๒)', color: 'bg-slate-400/20 border-slate-400/50 text-slate-200' },
+            { code: '3', name: 'ดาวอังคาร (๓)', color: 'bg-pink-500/20 border-pink-500/50 text-pink-200' },
+            { code: '4', name: 'ดาวพุธ (๔)', color: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' },
+            { code: '5', name: 'ดาวพฤหัสบดี (๕)', color: 'bg-amber-500/20 border-amber-500/50 text-amber-200' },
+            { code: '6', name: 'ดาวศุกร์ (๖)', color: 'bg-sky-500/20 border-sky-500/50 text-sky-200' },
+            { code: '7', name: 'ดาวเสาร์ (๗)', color: 'bg-purple-500/20 border-purple-500/50 text-purple-200' },
+            { code: '8', name: 'ดาวราหู (๘)', color: 'bg-zinc-700/50 border-zinc-500 text-zinc-200' },
+            { code: '9', name: 'ดาวเกตุ (๙)', color: 'bg-teal-500/20 border-teal-500/50 text-teal-200' },
+            { code: '0', name: 'ดาวมฤตยู (๐)', color: 'bg-indigo-500/20 border-indigo-500/50 text-indigo-200' }
+        ];
+
+        // ฐานข้อมูลคำแปลเฉพาะของ Jan
+        const janInterpretations = {
+            1: {
+                '1': 'คนตรง แข็ง ไม่ยอมคน มีพลังปะทะสูง',
+                '2': 'นุ่มนวล รักสบาย มีเสน่ห์ ชอบสิ่งสวยงาม',
+                '3': 'ลุยมาก อยู่ไม่สุข ชอบทำอะไรด้วยตัวเอง',
+                '4': 'คิดเยอะ มีโลกส่วนตัว ปรับตัวเป็นช่วง ๆ',
+                '5': 'มองโอกาสเก่ง คุยเก่ง มีหัวผลประโยชน์',
+                '6': 'จริงจังกับความมั่นคง แต่ชีวิตมีจังหวะให้เปลี่ยนแผน',
+                '7': 'มีความลึกลับ ไม่เปิดไพ่หมด ชอบทำอะไรหลังฉาก',
+                '8': 'บุคลิกเข้มข้น เอาจริงเอาจัง และหมกมุ่นได้',
+                '9': 'แปลก มีความคิดของตัวเอง ไม่ชอบเดินตามคน',
+                '0': 'ชีวิตและตัวตนมีความพลิกผันสูง เรียนรู้จากวิกฤตเก่ง'
+            },
+            2: {
+                '1': 'หาเงินแบบสู้เอง แต่เรื่องเงินมีแรงปะทะง่าย',
+                '2': 'เงินหมดกับความสุข ของกิน ของสวย ๆ งาม ๆ',
+                '3': 'ขยันหาเงินมาก หาได้หลายทาง ไม่กลัวเหนื่อย',
+                '4': 'การเงินอาจเดินช้า แต่มีความคิดหาวิธีใหม่ ๆ',
+                '5': 'หาโอกาสทำเงินเก่ง แต่รายรับรายจ่ายมีความพลิก',
+                '6': 'ต้องการฐานะมั่นคง แต่มีจังหวะต้องปรับระบบการเงิน',
+                '7': 'เงินหรือทรัพย์บางอย่างเกี่ยวข้องกับเรื่องเบื้องหลัง/สิ่งที่คนอื่นไม่รู้',
+                '8': 'เงินเป็นเรื่องที่อินมาก อยากมี อยากโต อยากควบคุม',
+                '9': 'หาเงินจากสิ่งแปลกใหม่ ความรู้เฉพาะทาง หรือทางที่คนอื่นไม่ค่อยทำ',
+                '0': 'การเงินมีจังหวะพลิกแรง ต้องใช้สติและแผนสำรอง'
+            },
+            3: {
+                '1': 'ชนเลย ไม่ค่อยถอย',
+                '2': 'เลือกทางที่สบายและประนีประนอม',
+                '3': 'พลังงานล้น ทำสิบอย่างพร้อมกันได้',
+                '4': 'คิดวิธีใหม่ แต่บางครั้งติดขั้นตอน',
+                '5': 'ขยันเพราะเห็นโอกาส',
+                '6': 'ทำเพื่อสร้างหลักให้ชีวิต',
+                '7': 'ชอบแก้ปัญหาแบบเงียบ ๆ หรือหลังฉาก',
+                '8': 'ถ้าเอาจริงจะเอาจริงมาก',
+                '9': 'ชอบทดลองวิธีแปลก ๆ',
+                '0': 'ยิ่งเจอโจทย์ยากยิ่งต้องงัดสมองออกมาใช้'
+            },
+            4: {
+                '1': 'บ้านอาจเป็นพื้นที่ที่มีแรงปะทะหรือความคิดเห็นแรง ๆ',
+                '2': 'ต้องการบ้านที่สวย สบาย อบอุ่น',
+                '3': 'บ้านไม่ค่อยนิ่ง ชีวิตมีการเคลื่อนไหว',
+                '4': 'ต้องการความมั่นคง แต่ก็อยากปรับบ้าน/ชีวิตให้ดีขึ้นเรื่อย ๆ',
+                '5': 'บ้านเกี่ยวข้องกับโอกาสหรือผลประโยชน์',
+                '6': 'ต้องการหลักชีวิตที่มั่นคง แต่มีเหตุให้ต้องเปลี่ยน',
+                '7': 'มีเรื่องที่ไม่ค่อยพูดกันตรง ๆ ในครอบครัวได้',
+                '8': 'ผูกพันกับบ้าน/ครอบครัวลึกมาก',
+                '9': 'บ้านหรือวิถีชีวิตไม่จำเป็นต้องเหมือนคนทั่วไป',
+                '0': 'ฐานชีวิตมีความพลิก ต้องเก่งเรื่องตั้งหลักใหม่'
+            },
+            5: {
+                '1': 'รักแรง เล่นแรง แข่งขันแรง',
+                '2': 'โรแมนติก ชอบความหวานและความสุข',
+                '3': 'จีบก็ลุย ทำอะไรก็เต็มที่',
+                '4': 'ครีเอทีฟ แต่กว่าจะสร้างอะไรสำเร็จอาจใช้เวลา',
+                '5': 'มองเห็นจังหวะและโอกาส แต่ต้องระวังความผันผวน',
+                '6': 'อยากสร้างสิ่งที่เป็นหลักเป็นฐาน',
+                '7': 'มีรสนิยมเรื่องรัก/งานสร้างสรรค์ที่ค่อนข้างเฉพาะตัว',
+                '8': 'รักอะไรแล้วอินมาก หวงมาก ทุ่มมาก',
+                '9': 'ชอบรักหรือสร้างงานแบบไม่ตามสูตร',
+                '0': 'เรื่องที่รักหรือสิ่งที่สร้างอาจมีจังหวะพลิกแบบคาดไม่ถึง'
+            },
+            6: {
+                '1': 'สู้กลับทันที',
+                '2': 'ปัญหามาแบบนิ่ม ๆ แต่สะสม',
+                '3': 'แก้ปัญหาเร็ว ลุยจนมันจบ',
+                '4': 'ค่อย ๆ วิเคราะห์และหาวิธีใหม่',
+                '5': 'ใช้คน ใช้ข้อมูล ใช้โอกาสแก้',
+                '6': 'เจอปัญหาแล้วต้องจัดระบบชีวิตใหม่',
+                '7': 'แก้ปัญหาแบบไม่ให้คนอื่นรู้',
+                '8': 'ยิ่งเจอปัญหายิ่งเอาจริง',
+                '9': 'ใช้วิธีนอกกรอบในการแก้',
+                '0': 'ปัญหาระดับ “บอสไฟต์” แต่ก็ฝึกให้เอาตัวรอดเก่ง'
+            },
+            7: {
+                '1': 'เจอกันทีมีแรงปะทะ',
+                '2': 'ได้คนที่นุ่มนวล รักสบาย หรือพากันเปย์',
+                '3': 'คู่เป็นสายลุย ทำอะไรเร็ว',
+                '4': 'ความสัมพันธ์ต้องใช้การพูดคุยและเวลา',
+                '5': 'คู่/หุ้นส่วนเกี่ยวข้องกับโอกาสและผลประโยชน์',
+                '6': 'ต้องการคู่ที่สร้างความมั่นคง แต่ความสัมพันธ์มีบททดสอบ',
+                '7': 'คู่มีโลกส่วนตัวหรือมีเรื่องที่ไม่เปิดเผยง่าย',
+                '8': 'ความสัมพันธ์เข้มข้นมาก ผูกพันแรง',
+                '9': 'ชอบคนแปลก คนเก่ง คนมีโลกของตัวเอง',
+                '0': 'ความสัมพันธ์มีจุดพลิกที่คาดเดายาก ต้องปรับตัวสูง'
+            },
+            8: {
+                '1': 'เปลี่ยนแบบหักดิบ',
+                '2': 'พยายามประคองสิ่งเดิมไว้',
+                '3': 'ลุยแก้ทันที',
+                '4': 'ใช้เวลาย่อยและทำความเข้าใจ',
+                '5': 'วิกฤตกลายเป็นช่องทางใหม่ได้',
+                '6': 'เปลี่ยนเพื่อสร้างความมั่นคงใหม่',
+                '7': 'เปลี่ยนแบบเงียบ ๆ คนอื่นไม่รู้',
+                '8': 'เปลี่ยนลึกถึงระดับตัวตน',
+                '9': 'วิกฤตทำให้ความคิดเปลี่ยนไปไกลจากเดิม',
+                '0': 'พลิกชีวิตแรง แล้วต้องสร้างตัวเองขึ้นมาใหม่'
+            },
+            9: {
+                '1': 'เชื่อในตัวเองและประสบการณ์ตรง',
+                '2': 'ให้คุณค่ากับความสุข ความกลมกลืน',
+                '3': 'เรียนรู้ด้วยการลงมือทำ',
+                '4': 'ใช้เหตุผลและเปิดรับแนวคิดใหม่',
+                '5': 'มองความรู้เป็นโอกาส',
+                '6': 'ต้องการหลักการที่ใช้สร้างชีวิตจริง',
+                '7': 'สนใจเรื่องลึกหรือสิ่งที่คนทั่วไปไม่เห็น',
+                '8': 'ถ้าเชื่ออะไรแล้วเชื่อลึกมาก',
+                '9': 'คิดนอกกรอบสุด ๆ',
+                '0': 'โลกทัศน์เปลี่ยนได้จากประสบการณ์พลิกชีวิต'
+            },
+            10: {
+                '1': 'นักสู้ในงาน แข่งขันสูง',
+                '2': 'งานที่สร้างความสุข ความสวยงาม หรือความสบาย',
+                '3': 'ขยันมาก ทำงานหนักและเดินหน้าเร็ว',
+                '4': 'นักแก้ปัญหา/นักคิด/นักปรับปรุง',
+                '5': 'นักหาโอกาส นักเจรจา นักต่อยอด',
+                '6': 'สร้างระบบ สร้างความมั่นคง',
+                '7': 'เด่นงานเบื้องหลัง ข้อมูล กลยุทธ์',
+                '8': 'งานต้องมีความหมายหรือความเข้มข้น ไม่ชอบทำแบบผ่าน ๆ',
+                '9': 'งานแปลก งานเฉพาะทาง งานสร้างสรรค์',
+                '0': 'เก่งกับงานวิกฤต งานเปลี่ยนแปลง และโจทย์ยาก'
+            },
+            11: {
+                '1': 'ได้โอกาสจากการแข่งขันและคนเก่ง ๆ',
+                '2': 'ได้จากเสน่ห์ ความสัมพันธ์ และสังคม',
+                '3': 'เพื่อนเยอะ คอนเนกชั่นเยอะ โอกาสมาจากการลงมือ',
+                '4': 'ได้จากไอเดียและการสื่อสาร',
+                '5': 'เห็นช่องทางทำเงินจากเครือข่าย',
+                '6': 'สร้างเครือข่ายเพื่อความมั่นคงระยะยาว',
+                '7': 'มีคอนเนกชั่นที่คนทั่วไปไม่เห็น',
+                '8': 'เลือกคบคนลึก ๆ แต่ถ้าคบแล้วแน่น',
+                '9': 'สังคมเฉพาะกลุ่ม คนแปลก ๆ แต่มีของ',
+                '0': 'ผลลัพธ์มาแบบพลิกได้ ต้องรับมือกับความไม่แน่นอน'
+            },
+            12: {
+                '1': 'พยายามสู้กับสิ่งที่ควบคุมไม่ได้',
+                '2': 'หนีความเครียดด้วยความสุข ความสบาย หรือการพัก',
+                '3': 'อยู่ไม่เฉย พยายามทำอะไรสักอย่างเพื่อแก้สถานการณ์',
+                '4': 'คิดวน หาวิธีทำความเข้าใจสิ่งที่เกิดขึ้น',
+                '5': 'ใช้ความรู้และคนรอบตัวหาทางออก',
+                '6': 'พยายามรักษาหลักชีวิตเอาไว้',
+                '7': 'เก่งเรื่องจัดการเรื่องลับ/หลังฉาก',
+                '8': 'เข้าไปขุดถึงรากของปัญหา',
+                '9': 'มีโลกภายในหรือความสนใจส่วนตัวที่คนอื่นเข้าไม่ถึง',
+                '0': 'ต้องปล่อยของเก่าแล้วหาทางเอาตัวรอดจากสิ่งที่เปลี่ยน'
+            }
+        };
+
+        // เก็บข้อมูลแยกตามบุคคล (Tab)
+        let profileData = {
+            'Jan': {
+                name: 'Jan',
+                placements: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [] }
+            },
+            'Anda': {
+                name: 'Anda',
+                placements: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [] }
+            },
+            'YayNoi': {
+                name: 'ยายน้อย',
+                placements: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [] }
+            }
+        };
+
+        let currentTab = 'Jan';
+        let activeSelectedPlanet = null; // สำหรับกรณีคลิกเลือกดาวแล้วไปจิ้มใส่ภพ
+
+        function switchTab(tabKey) {
+            currentTab = tabKey;
+            activeSelectedPlanet = null;
+
+            // อัปเดต UI ปุ่มแท็บ
+            ['Jan', 'Anda', 'YayNoi'].forEach(key => {
+                const btn = document.getElementById(`tabBtn-${key}`);
+                if (key === tabKey) {
+                    btn.className = "tab-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 bg-purple-600 text-white shadow-lg shadow-purple-600/30";
+                } else {
+                    btn.className = "tab-btn px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 bg-slate-800 text-slate-300 hover:bg-slate-700";
+                }
+            });
+
+            document.getElementById('currentProfileName').innerText = profileData[tabKey].name;
+            renderUI();
+        }
+
+        function renderUI() {
+            renderPlanets();
+            renderHouses();
+            renderInterpretation();
+        }
+
+        function renderPlanets() {
+            const container = document.getElementById('planetList');
+            container.innerHTML = planetsData.map(p => {
+                const isSelected = activeSelectedPlanet === p.code;
+                return `
+                    <div onclick="selectPlanet('${p.code}')" 
+                         class="planet-badge cursor-pointer px-3 py-2 rounded-xl border text-xs font-medium flex items-center space-x-2 ${p.color} ${isSelected ? 'ring-2 ring-amber-400 shadow-lg shadow-amber-400/20 scale-105' : 'hover:bg-slate-800'}">
+                        <span>${p.name}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectPlanet(code) {
+            if (activeSelectedPlanet === code) {
+                activeSelectedPlanet = null;
+            } else {
+                activeSelectedPlanet = code;
+            }
+            renderPlanets();
+        }
+
+        function renderHouses() {
+            const housePlacements = profileData[currentTab].placements;
+            const container = document.getElementById('housesContainer');
+            
+            container.innerHTML = housesData.map(h => {
+                const planetsInHouse = housePlacements[h.id];
+                return `
+                    <div onclick="handleHouseClick(${h.id})" 
+                         class="bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 rounded-xl p-4 cursor-pointer transition relative group">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-amber-400">ภพที่ ${h.id}</span>
+                                <h3 class="text-sm font-semibold text-slate-100">${h.name}</h3>
+                            </div>
+                            <span class="text-[10px] text-slate-400 text-right max-w-[120px] truncate">${h.desc}</span>
+                        </div>
+                        
+                        <div class="mt-3 flex flex-wrap gap-1.5 min-h-[32px] items-center">
+                            ${planetsInHouse.length === 0 ? 
+                                '<span class="text-xs text-slate-500 italic">คลิกเพื่อใส่ดาวจร...</span>' : 
+                                planetsInHouse.map(pCode => {
+                                    const planet = planetsData.find(pl => pl.code === pCode);
+                                    return `
+                                        <span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded-lg bg-indigo-900/80 border border-indigo-700 text-indigo-200">
+                                            ${planet ? planet.name.split(' ')[0] : pCode}
+                                            <button onclick="event.stopPropagation(); removePlanet(${h.id}, '${pCode}')" class="ml-1.5 text-indigo-400 hover:text-red-400">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </span>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleHouseClick(houseId) {
+            const housePlacements = profileData[currentTab].placements;
+            if (activeSelectedPlanet) {
+                if (!housePlacements[houseId].includes(activeSelectedPlanet)) {
+                    housePlacements[houseId].push(activeSelectedPlanet);
+                }
+                activeSelectedPlanet = null;
+                renderUI();
+            } else {
+                openQuickPlanetSelector(houseId);
+            }
+        }
+
+        function openQuickPlanetSelector(houseId) {
+            const house = housesData.find(h => h.id === houseId);
+            const housePlacements = profileData[currentTab].placements;
+            const currentPlanets = housePlacements[houseId];
+            
+            let html = `
+                <div class="p-4 bg-slate-800/90 border border-indigo-500/50 rounded-xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-amber-300">เลือกดาวสถิตใน "${house.name} (ภพที่ ${houseId})" [${profileData[currentTab].name}]</h4>
+                        <button onclick="renderInterpretation()" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i> ปิด</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${planetsData.map(p => {
+                            const isPresent = currentPlanets.includes(p.code);
+                            return `
+                                <button onclick="togglePlanetInHouse(${houseId}, '${p.code}')" 
+                                    class="text-left text-xs px-2.5 py-1.5 rounded-lg border flex items-center justify-between ${isPresent ? 'bg-purple-900/60 border-purple-500 text-purple-200' : 'bg-slate-900/50 border-slate-700 text-slate-300 hover:bg-slate-700'}">
+                                    <span>${p.name}</span>
+                                    <i class="fa-solid ${isPresent ? 'fa-check text-purple-400' : 'fa-plus text-slate-500'}"></i>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('interpretationContent').innerHTML = html;
+            document.getElementById('selectedHouseIndicator').innerText = `กำลังเลือกดาว: ${house.name}`;
+        }
+
+        function togglePlanetInHouse(houseId, pCode) {
+            const housePlacements = profileData[currentTab].placements;
+            const index = housePlacements[houseId].indexOf(pCode);
+            if (index > -1) {
+                housePlacements[houseId].splice(index, 1);
+            } else {
+                housePlacements[houseId].push(pCode);
+            }
+            renderHouses();
+            openQuickPlanetSelector(houseId);
+            renderInterpretationSummary();
+        }
+
+        function removePlanet(houseId, pCode) {
+            const housePlacements = profileData[currentTab].placements;
+            profileData[currentTab].placements[houseId] = housePlacements[houseId].filter(c => c !== pCode);
+            renderUI();
+        }
+
+        function resetCurrentTab() {
+            profileData[currentTab].placements = {
+                1: [], 2: [], 3: [], 4: [], 5: [], 6: [],
+                7: [], 8: [], 9: [], 10: [], 11: [], 12: []
+            };
+            activeSelectedPlanet = null;
+            renderUI();
+        }
+
+        function renderInterpretation() {
+            document.getElementById('selectedHouseIndicator').innerText = `ภาพรวมดวง: ${profileData[currentTab].name}`;
+            renderInterpretationSummary();
+        }
+
+        function renderInterpretationSummary() {
+            const container = document.getElementById('interpretationContent');
+            const housePlacements = profileData[currentTab].placements;
+            let hasAnyPlanet = Object.values(housePlacements).some(arr => arr.length > 0);
+
+            if (!hasAnyPlanet) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-wand-magic-sparkles text-4xl mb-3 text-purple-400/50"></i>
+                        <p class="text-sm">ยังไม่ได้เลือกดาวสถิตในภพของ ${profileData[currentTab].name}</p>
+                        <p class="text-xs text-slate-500 mt-1">กรุณากำหนดดาวจรในแต่ละภพทางด้านซ้าย</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="space-y-4">';
+            
+            housesData.forEach(h => {
+                const planets = housePlacements[h.id];
+                if (planets.length > 0) {
+                    html += `
+                        <div class="p-4 bg-slate-800/50 border border-slate-700/60 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-300">ภพที่ ${h.id} : ${h.name}</span>
+                                <span class="text-[10px] text-slate-400">${h.desc}</span>
+                            </div>
+                            <div class="space-y-1.5 pt-1">
+                    `;
+                    
+                    planets.forEach(pCode => {
+                        const planet = planetsData.find(pl => pl.code === pCode);
+                        // ดึงคำแปลเฉพาะของ Jan หากอยู่ในแท็บ Jan
+                        let descText = `[รอรับข้อมูลคำแปลความหมายสำหรับ ${profileData[currentTab].name}...]`;
+                        if (currentTab === 'Jan' && janInterpretations[h.id] && janInterpretations[h.id][pCode]) {
+                            descText = janInterpretations[h.id][pCode];
+                        }
+
+                        html += `
+                            <div class="p-2.5 bg-slate-900/80 rounded-lg border border-indigo-900/30 text-xs">
+                                <div class="font-semibold text-purple-300 mb-1 flex items-center">
+                                    <i class="fa-solid fa-circle-dot text-[8px] text-amber-400 mr-1.5"></i> ${planet ? planet.name : pCode} สถิตใน ${h.name}
+                                </div>
+                                <p class="text-slate-200 text-[11px] bg-slate-800/50 p-2.5 rounded border border-slate-700/40 leading-relaxed">
+                                    ${descText}
+                                </p>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                }
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderUI();
+        };
+    </script>
+</body>
+</html>
