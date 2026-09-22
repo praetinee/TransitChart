@@ -890,69 +890,73 @@
                         if (currentDict && currentDict[h.id] && currentDict[h.id][pCode]) {
                             descText = currentDict[h.id][pCode];
                         }
-                        // --- ระบบคำนวณเกณฑ์มุมสัมพันธ์กับดาวพื้นชะตา ---
-                        let aspectsHtml = '';
-                        const natal = natalCharts[currentProfile];
-                        if (natal) {
-                            let aspectList = [];
-                            for (let nHouse = 1; nHouse <= 12; nHouse++) {
-                                const nPlanets = natal[nHouse];
-                                if (nPlanets && nPlanets.length > 0) {
-                                    // คำนวณระยะห่างระหว่างภพแบบวงกลม
-                                    let diff = Math.abs(h.id - nHouse);
-                                    if (diff > 6) diff = 12 - diff; 
-                                    
-                                    let aspectInfo = null;
-                                    if (diff === 0) aspectInfo = { name: 'ทับ', effect: 'รวม', color: 'text-fuchsia-400' };
-                                    else if (diff === 2) aspectInfo = { name: 'โยค', effect: 'ช่วย', color: 'text-emerald-400' };
-                                    else if (diff === 3) aspectInfo = { name: 'ฉาก', effect: 'ขัด', color: 'text-red-400' };
-                                    else if (diff === 4) aspectInfo = { name: 'ตรีโกณ', effect: 'ไหลลื่น', color: 'text-sky-400' };
-                                    else if (diff === 6) aspectInfo = { name: 'เล็ง', effect: 'กดดัน', color: 'text-orange-400' };
-                                    
-                                    if (aspectInfo) {
-                                        nPlanets.forEach(nP => {
-                                            // 1. จัดการชื่อดาวที่จะแสดงในวงเล็บ (เช่น 3 หรือ ลัคนา)
-                                            let nCodeDisplay = nP === 'L' ? 'ลัคนา' : nP;
-                                            
-                                            // 2. ดึงความหมายของดาวเดิมในภพนั้นๆ มาจาก Dictionary
-                                            let nMeaning = '';
-                                            if (nP === 'L') {
-                                                nMeaning = 'จุดศูนย์กลางตัวตนและวาสนา';
-                                            } else if (currentDict && currentDict[nHouse] && currentDict[nHouse][nP]) {
-                                                nMeaning = currentDict[nHouse][nP];
-                                            } else {
-                                                nMeaning = '...'; // กรณีไม่มีคำแปล
-                                            }
-
-                                            // 3. สร้าง HTML แบบบล็อกยาวให้อ่านง่าย
-                                            aspectList.push(
-                                                `<div class="bg-slate-950/80 p-2 rounded border border-slate-700/50 mb-1.5 text-[11px] text-slate-300 leading-relaxed">` +
-                                                    `<span class="${aspectInfo.color} font-bold">${aspectInfo.name} (${aspectInfo.effect})</span> ` +
-                                                    `<span class="text-amber-400 font-bold mx-1">[ ${nCodeDisplay} เดิม ]</span> ` +
-                                                    `<span>${nMeaning}</span>` +
-                                                `</div>`
-                                            );
-                                        });
-                                    }
-                                }
-                            }
-                            if (aspectList.length > 0) {
-                                aspectsHtml = `<div class="mt-2.5 pt-2.5 border-t border-indigo-900/40"><div class="text-[10px] text-slate-400 mb-1.5"><i class="fa-solid fa-link text-indigo-400 mr-1"></i>เกณฑ์ดาวสัมพันธ์ดวงเดิม:</div>${aspectList.join('')}</div>`;
-                            }
-                        }
-                        // ------------------------------------------
 
                         html += `
                             <div class="p-2 bg-slate-900/80 rounded-lg border border-indigo-900/30 text-[10px] sm:text-xs">
                                 <div class="font-semibold text-purple-300 mb-1 flex items-center">
                                     <i class="fa-solid fa-circle-dot text-[7px] sm:text-[8px] text-amber-400 mr-1.5"></i> ${planet ? planet.name : pCode} สถิตใน ${h.name}
                                 </div>
-                                <p class="text-slate-200 text-[11px] bg-slate-800/50 p-2 rounded border border-slate-700/40 leading-relaxed">
-                                    ${descText}${aspectsHtml}
+                                <p class="text-slate-200 text-[10px] sm:text-[11px] bg-slate-800/50 p-1.5 sm:p-2 rounded border border-slate-700/40 leading-relaxed">
+                                    ${descText}
                                 </p>
                             </div>
                         `;
                     });
+                    // --- ระบบคำนวณเกณฑ์มุมสัมพันธ์กับดาวพื้นชะตา (ย้ายมาไว้หลังดาวจรทั้งหมด ทำแค่ 1 รอบต่อ 1 ภพ) ---
+                    const natal = natalCharts[currentProfile];
+                    if (natal) {
+                        let aspectList = [];
+                        for (let nHouse = 1; nHouse <= 12; nHouse++) {
+                            const nPlanets = natal[nHouse];
+                            if (nPlanets && nPlanets.length > 0) {
+                                let diff = Math.abs(h.id - nHouse);
+                                if (diff > 6) diff = 12 - diff; 
+                                
+                                let aspectInfo = null;
+                                if (diff === 0) aspectInfo = { name: 'ทับ', effect: 'รวม', color: 'text-fuchsia-400' };
+                                else if (diff === 2) aspectInfo = { name: 'โยค', effect: 'ช่วย', color: 'text-emerald-400' };
+                                else if (diff === 3) aspectInfo = { name: 'ฉาก', effect: 'ขัด', color: 'text-red-400' };
+                                else if (diff === 4) aspectInfo = { name: 'ตรีโกณ', effect: 'ไหลลื่น', color: 'text-sky-400' };
+                                else if (diff === 6) aspectInfo = { name: 'เล็ง', effect: 'กดดัน', color: 'text-orange-400' };
+                                
+                                if (aspectInfo) {
+                                    nPlanets.forEach(nP => {
+                                        let nCodeDisplay = nP === 'L' ? 'ลัคนา' : nP;
+                                        
+                                        // ดึงความหมายเดิมของดาวในภพนั้นๆ
+                                        const profileInterps = {
+                                            'Jan': janInterpretations,
+                                            'Anda': andaInterpretations,
+                                            'YayNoi': yayNoiInterpretations
+                                        };
+                                        const currentDict = profileInterps[currentProfile];
+                                        let nMeaning = '';
+                                        
+                                        if (nP === 'L') {
+                                            nMeaning = 'จุดศูนย์กลางตัวตนและวาสนา';
+                                        } else if (currentDict && currentDict[nHouse] && currentDict[nHouse][nP]) {
+                                            nMeaning = currentDict[nHouse][nP];
+                                        } else {
+                                            nMeaning = '...';
+                                        }
+
+                                        aspectList.push(
+                                            `<div class="bg-slate-950/80 p-2 rounded border border-slate-700/50 mt-1.5 text-[10px] sm:text-[11px] text-slate-300 leading-relaxed">` +
+                                                `<span class="${aspectInfo.color} font-bold">${aspectInfo.name} (${aspectInfo.effect})</span> ` +
+                                                `<span class="text-amber-400 font-bold mx-1">[ ${nCodeDisplay} เดิม ]</span> ` +
+                                                `<span>${nMeaning}</span>` +
+                                            `</div>`
+                                        );
+                                    });
+                                }
+                            }
+                        }
+                        // ถ้านับแล้วมีมุมสัมพันธ์ ให้พิมพ์กล่องสรุปออกมาแค่รอบเดียว
+                        if (aspectList.length > 0) {
+                            html += `<div class="mt-3 pt-2.5 border-t border-indigo-900/40"><div class="text-[10px] sm:text-[11px] text-slate-400 mb-1.5"><i class="fa-solid fa-link text-indigo-400 mr-1"></i>เกณฑ์ดาวสัมพันธ์ดวงเดิมในภพนี้:</div>${aspectList.join('')}</div>`;
+                        }
+                    }
+                    // -------------------------------------------------------------------------------------------------
 
                     html += `</div></div>`;
                 }
