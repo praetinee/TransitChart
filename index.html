@@ -648,6 +648,27 @@
             }
         };
 
+        // ฐานข้อมูลดาวพื้นชะตา (Natal Chart) 
+        // รหัส 1-0 คือดาว / 'L' คือ ลัคนา
+        const natalCharts = {
+            'Jan': {
+                1: ['8', '9', 'L'], // ตนุ: ราหู, เกตุ, ลัคนา
+                2: [],
+                3: ['3'], // สหัชชะ: อังคาร
+                4: ['5'], // พันธุ: พฤหัส
+                5: [],
+                6: [],
+                7: [],
+                8: [],
+                9: ['2'], // ศุภะ: จันทร์
+                10: [],
+                11: ['4', '6', '7', '0'], // ลาภะ: พุธ, ศุกร์, เสาร์, มฤตยู
+                12: ['1'] // วินาศ: อาทิตย์
+            },
+            'Anda': { 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[], 10:[], 11:[], 12:[] },
+            'YayNoi': { 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[], 10:[], 11:[], 12:[] }
+        };
+        
         let appData = {
             'Jan': {
                 name: 'Jan',
@@ -843,14 +864,47 @@
                         if (currentDict && currentDict[h.id] && currentDict[h.id][pCode]) {
                             descText = currentDict[h.id][pCode];
                         }
+                        // --- ระบบคำนวณเกณฑ์มุมสัมพันธ์กับดาวพื้นชะตา ---
+                        let aspectsHtml = '';
+                        const natal = natalCharts[currentProfile];
+                        if (natal) {
+                            let aspectList = [];
+                            for (let nHouse = 1; nHouse <= 12; nHouse++) {
+                                const nPlanets = natal[nHouse];
+                                if (nPlanets && nPlanets.length > 0) {
+                                    // คำนวณระยะห่างระหว่างภพแบบวงกลม
+                                    let diff = Math.abs(h.id - nHouse);
+                                    if (diff > 6) diff = 12 - diff; 
+                                    
+                                    let aspectInfo = null;
+                                    if (diff === 0) aspectInfo = { name: 'ทับ', effect: 'รวม', color: 'text-fuchsia-400' };
+                                    else if (diff === 2) aspectInfo = { name: 'โยค', effect: 'ช่วย', color: 'text-emerald-400' };
+                                    else if (diff === 3) aspectInfo = { name: 'ฉาก', effect: 'ขัด', color: 'text-red-400' };
+                                    else if (diff === 4) aspectInfo = { name: 'ตรีโกณ', effect: 'ไหลลื่น', color: 'text-sky-400' };
+                                    else if (diff === 6) aspectInfo = { name: 'เล็ง', effect: 'กดดัน', color: 'text-orange-400' };
+                                    
+                                    if (aspectInfo) {
+                                        nPlanets.forEach(nP => {
+                                            // แปลงรหัสเป็นชื่อดาวเดิม
+                                            let nName = nP === 'L' ? 'ลัคนา' : (planetsData.find(x => x.code === nP)?.name.split(' ')[0] || nP);
+                                            aspectList.push(`<span class="inline-block bg-slate-950/60 px-2 py-1 rounded border border-slate-700/50 mr-1.5 mb-1.5 text-[11px]"><span class="${aspectInfo.color} font-bold">${aspectInfo.name}</span> (${aspectInfo.effect}) ${nName}เดิมในภพ${nHouse}</span>`);
+                                        });
+                                    }
+                                }
+                            }
+                            if (aspectList.length > 0) {
+                                aspectsHtml = `<div class="mt-2.5 pt-2.5 border-t border-indigo-900/40"><div class="text-[10px] text-slate-400 mb-1.5"><i class="fa-solid fa-link text-indigo-400 mr-1"></i>เกณฑ์ดาวสัมพันธ์ดวงเดิม:</div>${aspectList.join('')}</div>`;
+                            }
+                        }
+                        // ------------------------------------------
 
                         html += `
                             <div class="p-2 bg-slate-900/80 rounded-lg border border-indigo-900/30 text-[10px] sm:text-xs">
                                 <div class="font-semibold text-purple-300 mb-1 flex items-center">
                                     <i class="fa-solid fa-circle-dot text-[7px] sm:text-[8px] text-amber-400 mr-1.5"></i> ${planet ? planet.name : pCode} สถิตใน ${h.name}
                                 </div>
-                                <p class="text-slate-200 text-[10px] sm:text-[11px] bg-slate-800/50 p-1.5 sm:p-2 rounded border border-slate-700/40 leading-relaxed">
-                                    ${descText}
+                                <p class="text-slate-200 text-[11px] bg-slate-800/50 p-2 rounded border border-slate-700/40 leading-relaxed">
+                                    ${descText}${aspectsHtml}
                                 </p>
                             </div>
                         `;
