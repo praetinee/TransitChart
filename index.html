@@ -885,9 +885,27 @@
                                     
                                     if (aspectInfo) {
                                         nPlanets.forEach(nP => {
-                                            // แปลงรหัสเป็นชื่อดาวเดิม
-                                            let nName = nP === 'L' ? 'ลัคนา' : (planetsData.find(x => x.code === nP)?.name.split(' ')[0] || nP);
-                                            aspectList.push(`<span class="inline-block bg-slate-950/60 px-2 py-1 rounded border border-slate-700/50 mr-1.5 mb-1.5 text-[11px]"><span class="${aspectInfo.color} font-bold">${aspectInfo.name}</span> (${aspectInfo.effect}) ${nName}เดิมในภพ${nHouse}</span>`);
+                                            // 1. จัดการชื่อดาวที่จะแสดงในวงเล็บ (เช่น 3 หรือ ลัคนา)
+                                            let nCodeDisplay = nP === 'L' ? 'ลัคนา' : nP;
+                                            
+                                            // 2. ดึงความหมายของดาวเดิมในภพนั้นๆ มาจาก Dictionary
+                                            let nMeaning = '';
+                                            if (nP === 'L') {
+                                                nMeaning = 'จุดศูนย์กลางตัวตนและวาสนา';
+                                            } else if (currentDict && currentDict[nHouse] && currentDict[nHouse][nP]) {
+                                                nMeaning = currentDict[nHouse][nP];
+                                            } else {
+                                                nMeaning = '...'; // กรณีไม่มีคำแปล
+                                            }
+
+                                            // 3. สร้าง HTML แบบบล็อกยาวให้อ่านง่าย
+                                            aspectList.push(
+                                                `<div class="bg-slate-950/80 p-2 rounded border border-slate-700/50 mb-1.5 text-[11px] text-slate-300 leading-relaxed">` +
+                                                    `<span class="${aspectInfo.color} font-bold">${aspectInfo.name} (${aspectInfo.effect})</span> ` +
+                                                    `<span class="text-amber-400 font-bold mx-1">[ ${nCodeDisplay} เดิม ]</span> ` +
+                                                    `<span>${nMeaning}</span>` +
+                                                `</div>`
+                                            );
                                         });
                                     }
                                 }
