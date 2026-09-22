@@ -902,9 +902,9 @@
                             </div>
                         `;
                     });
-                    // --- ระบบคำนวณเกณฑ์มุมสัมพันธ์กับดาวพื้นชะตา (ย้ายมาไว้หลังดาวจรทั้งหมด ทำแค่ 1 รอบต่อ 1 ภพ) ---
+                    // --- ระบบคำนวณเกณฑ์มุมสัมพันธ์กับดาวพื้นชะตา (แสดงเฉพาะใน "ราศีจักร" เท่านั้น) ---
                     const natal = natalCharts[currentProfile];
-                    if (natal) {
+                    if (natal && chartKey === 'rasri') {
                         let aspectList = [];
                         for (let nHouse = 1; nHouse <= 12; nHouse++) {
                             const nPlanets = natal[nHouse];
