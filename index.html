@@ -923,6 +923,10 @@
                                     nPlanets.forEach(nP => {
                                         let nCodeDisplay = nP === 'L' ? 'ลัคนา' : nP;
                                         
+                                        // ดึงชื่อภพของดาวพื้นชะตาดวงนั้น (และตัดคำว่า "ภพ" ออกให้เหลือแค่ชื่อ)
+                                        let nHouseObj = housesData.find(hx => hx.id === nHouse);
+                                        let nHouseName = nHouseObj ? nHouseObj.name.replace('ภพ', '') : '';
+                                        
                                         // ดึงความหมายเดิมของดาวในภพนั้นๆ
                                         const profileInterps = {
                                             'Jan': janInterpretations,
@@ -943,7 +947,7 @@
                                         aspectList.push(
                                             `<div class="bg-slate-950/80 p-2 rounded border border-slate-700/50 mt-1.5 text-[10px] sm:text-[11px] text-slate-300 leading-relaxed">` +
                                                 `<span class="${aspectInfo.color} font-bold">${aspectInfo.name} (${aspectInfo.effect})</span> ` +
-                                                `<span class="text-amber-400 font-bold mx-1">[ ${nCodeDisplay} เดิม ]</span> ` +
+                                                `<span class="text-amber-400 font-bold mx-1">[ ${nCodeDisplay} ${nHouseName} ]</span> ` +
                                                 `<span>${nMeaning}</span>` +
                                             `</div>`
                                         );
